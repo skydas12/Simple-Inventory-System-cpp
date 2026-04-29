@@ -1,0 +1,10 @@
+# CLion
+.idea/
+cmake-build-*/
+
+# Build files
+*.exe
+*.o
+
+# OS
+.DS_Store
