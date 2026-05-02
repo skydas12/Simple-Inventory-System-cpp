@@ -2,3 +2,4 @@ Milk 10 1.25
 Bread 5 0.89
 Eggs 30 0.20
 Cheese 3 4.50
+Yoghurt 2 1.50

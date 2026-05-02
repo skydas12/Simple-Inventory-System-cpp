@@ -1,4 +1,17 @@
-Milk 10 1.25
-Bread 5 0.89
-Eggs 30 0.20
-Cheese 3 4.50
+Product name   |   Quantity   |    Price
+<------------------------------------------------->
+Milk                  10           1.25           
+Bread                 5            0.89           
+Eggs                  30           0.20           
+Cheese                3            4.50           
+Yoghurt               2            1.50           
+
+<-------------< Product Summary >----------------->
+
+Total price of the product inventory: 39.45
+Most Expensive Product: Cheese, its price is 4.50
+
+<-------< Products that are low on stock >-------->
+Product name   |   Quantity   |     
+Cheese                3              
+Yoghurt               2              
