@@ -5,13 +5,42 @@ Bread                 5            0.89
 Eggs                  30           0.20           
 Cheese                3            4.50           
 Yoghurt               2            1.50           
+Apple                 12           0.80           
+Banana                20           0.50           
+Orange                15           0.90           
+Tomato                8            1.20           
+Potato                30           0.40           
+Onion                 25           0.35           
+Chicken               6            5.50           
+Beef                  4            8.20           
+Fish                  3            6.75           
+
+<-------------------< sorted >------------------->
+Product name   |   Quantity   |    Price
+<------------------------------------------------->
+Eggs                  30           0.20           
+Onion                 25           0.35           
+Potato                30           0.40           
+Banana                20           0.50           
+Apple                 12           0.80           
+Bread                 5            0.89           
+Orange                15           0.90           
+Tomato                8            1.20           
+Milk                  10           1.25           
+Yoghurt               2            1.50           
+Cheese                3            4.50           
+Chicken               6            5.50           
+Fish                  3            6.75           
+Beef                  4            8.20           
 
 <-------------< Product Summary >----------------->
 
-Total price of the product inventory: 39.45
-Most Expensive Product: Cheese, its price is 4.50
+Total price of the product inventory: 188.95
+Most Expensive Product: Beef, its price is 8.20
 
 <-------< Products that are low on stock >-------->
 Product name   |   Quantity   |     
-Cheese                3              
 Yoghurt               2              
+Cheese                3              
+Fish                  3              
+Beef                  4              

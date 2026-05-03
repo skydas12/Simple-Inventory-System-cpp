@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <cctype>
 using namespace std;
 
 struct product {
@@ -17,14 +18,64 @@ void printSummary(const vector<product> &products, const vector<product> &lowSto
 int mostExpensiveProduct(const vector<product> &products);
 vector <product> findLowStock(const vector<product> &products);
 int findProductByName(const vector<product> &products);
+void sortByPrice(vector<product> &products,bool ascending);
+void sortByQuantity(vector<product> &products,bool ascending);
 
 int main() {
     ofstream output("output.txt");
     vector<product> products;
     if (readProducts(products)) {
-        vector<product> lowStock = findLowStock(products);
         printProducts(products,output);
-        printSummary(products,lowStock,output);
+        //-----------
+        cout << "Do you want to sort the data? (y/n)" << endl;
+        char sortDecision;
+        cin >> sortDecision;
+        sortDecision = tolower(sortDecision);
+
+        bool didSort = false;
+
+        if (sortDecision == 'y') {
+            cout << "By what do you wish to sort:\n"
+                    "- Price (p)\n"
+                    "- Quantity (q)" << endl;
+            char sortChoice;
+            cin >> sortChoice;
+            sortChoice = tolower(sortChoice);
+
+            cout << "Ascending/Descending? (a/d)"<< endl;
+            char orderChoice;
+            cin >> orderChoice;
+            orderChoice = tolower(orderChoice);
+            bool ascending;
+            //-----------------
+            if (orderChoice == 'a') {
+                ascending = true;
+            }
+            else if (orderChoice == 'd') {
+                ascending = false;
+            }
+            else {
+                cout << "Invalid sort choice. Defaulting to ascending" << endl;
+                ascending = true;
+            }
+            //------------------
+            if (sortChoice == 'p') {
+                sortByPrice(products,ascending);
+                didSort = true;
+            }
+            else if (sortChoice == 'q') {
+                sortByQuantity(products,ascending);
+                didSort = true;
+            }
+            else {
+                cout << "Invalid sort choice." << endl;
+            }
+        }
+        if (didSort) {
+            output << "\n<-------------------< sorted >------------------->\n";
+            printProducts(products,output);
+        }
+        //-----------
         int productIndex = findProductByName(products);
         if (productIndex == -1) {
             cout << "Product not found." << endl;
@@ -35,6 +86,9 @@ int main() {
             << "\nQuantity: " << products[productIndex].quantity
             << "\nPrice: " << products[productIndex].price;
         }
+        //-----------
+        vector<product> lowStock = findLowStock(products);
+        printSummary(products,lowStock,output);
     }
     else {
         cout << "Error reading input." << endl;
@@ -132,4 +186,29 @@ int findProductByName(const vector<product> &products) {
         }
     }
     return -1;
+}
+void sortByPrice(vector<product> &products, bool ascending) {
+    for (size_t i = 0; i < products.size(); i++) {
+        for (size_t j = i + 1; j < products.size(); j++) {
+            if (ascending && products[j].price < products[i].price ||
+                (!ascending && products[j].price > products[i].price)) {
+
+                product temp = products[i];
+                products[i] = products[j];
+                products[j] = temp;
+            }
+        }
+    }
+}
+void sortByQuantity(vector<product> &products,bool ascending) {
+    for (size_t i = 0; i < products.size(); i++) {
+        for (size_t j = i + 1; j < products.size(); j++) {
+            if (ascending && products[j].quantity < products[i].quantity ||
+                (!ascending && products[j].quantity > products[i].quantity)) {
+                product temp = products[i];
+                products[i] = products[j];
+                products[j] = temp;
+            }
+        }
+    }
 }
