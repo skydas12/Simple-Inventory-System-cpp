@@ -20,6 +20,8 @@ vector <product> findLowStock(const vector<product> &products);
 int findProductByName(const vector<product> &products);
 void sortByPrice(vector<product> &products,bool ascending);
 void sortByQuantity(vector<product> &products,bool ascending);
+void handleSorting(vector<product> &products,ofstream &output);
+void handleSearch(vector<product> &products,ofstream &output);
 
 int main() {
     ofstream output("output.txt");
@@ -27,65 +29,9 @@ int main() {
     if (readProducts(products)) {
         printProducts(products,output);
         //-----------
-        cout << "Do you want to sort the data? (y/n)" << endl;
-        char sortDecision;
-        cin >> sortDecision;
-        sortDecision = tolower(sortDecision);
-
-        bool didSort = false;
-
-        if (sortDecision == 'y') {
-            cout << "By what do you wish to sort:\n"
-                    "- Price (p)\n"
-                    "- Quantity (q)" << endl;
-            char sortChoice;
-            cin >> sortChoice;
-            sortChoice = tolower(sortChoice);
-
-            cout << "Ascending/Descending? (a/d)"<< endl;
-            char orderChoice;
-            cin >> orderChoice;
-            orderChoice = tolower(orderChoice);
-            bool ascending;
-            //-----------------
-            if (orderChoice == 'a') {
-                ascending = true;
-            }
-            else if (orderChoice == 'd') {
-                ascending = false;
-            }
-            else {
-                cout << "Invalid sort choice. Defaulting to ascending" << endl;
-                ascending = true;
-            }
-            //------------------
-            if (sortChoice == 'p') {
-                sortByPrice(products,ascending);
-                didSort = true;
-            }
-            else if (sortChoice == 'q') {
-                sortByQuantity(products,ascending);
-                didSort = true;
-            }
-            else {
-                cout << "Invalid sort choice." << endl;
-            }
-        }
-        if (didSort) {
-            output << "\n<-------------------< sorted >------------------->\n";
-            printProducts(products,output);
-        }
+        handleSorting(products,output);
         //-----------
-        int productIndex = findProductByName(products);
-        if (productIndex == -1) {
-            cout << "Product not found." << endl;
-        }
-        else {
-            cout << "Product was found." << endl;
-            cout << "Name: " << products[productIndex].name
-            << "\nQuantity: " << products[productIndex].quantity
-            << "\nPrice: " << products[productIndex].price;
-        }
+        handleSearch(products,output);
         //-----------
         vector<product> lowStock = findLowStock(products);
         printSummary(products,lowStock,output);
@@ -96,6 +42,7 @@ int main() {
     output.close();
     return 0;
 }
+
 bool readProducts(vector<product> &products) {
     ifstream input;
     input.open("input.txt");
@@ -211,4 +158,63 @@ void sortByQuantity(vector<product> &products,bool ascending) {
             }
         }
     }
+}
+void handleSorting(vector<product> &products, ofstream &output) {
+    cout << "Do you want to sort the data? (y/n)" << endl;
+    char sortDecision;
+    cin >> sortDecision;
+    sortDecision = tolower(sortDecision);
+
+    bool didSort = false;
+
+    if (sortDecision == 'y') {
+        cout << "By what do you wish to sort:\n"
+                "- Price (p)\n"
+                "- Quantity (q)" << endl;
+        char sortChoice;
+        cin >> sortChoice;
+        sortChoice = tolower(sortChoice);
+
+        cout << "Ascending/Descending? (a/d)"<< endl;
+        char orderChoice;
+        cin >> orderChoice;
+        orderChoice = tolower(orderChoice);
+
+        //-----------------
+        bool ascending = (orderChoice == 'a');
+        if (orderChoice != 'a' && orderChoice != 'd') {
+            cout << "Invalid order choice. Defaulting to ascending." << endl;
+        }
+        //------------------
+        if (sortChoice == 'p') {
+            sortByPrice(products,ascending);
+            didSort = true;
+        }
+        else if (sortChoice == 'q') {
+            sortByQuantity(products,ascending);
+            didSort = true;
+        }
+        else {
+            cout << "Invalid sort choice." << endl;
+        }
+    }
+    if (didSort) {
+        output << "\n<-------------------< sorted >------------------->\n";
+        printProducts(products,output);
+    }
+}
+void handleSearch(vector<product> &products,ofstream &output) {
+    int productIndex = findProductByName(products);
+    if (productIndex == -1) {
+        cout << "Product not found." << endl;
+    }
+    else {
+        cout << "Product was found." << endl;
+        cout << "Name: " << products[productIndex].name
+        << "\nQuantity: " << products[productIndex].quantity
+        << "\nPrice: " << products[productIndex].price;
+    }
+    //-----------
+    vector<product> lowStock = findLowStock(products);
+    printSummary(products,lowStock,output);
 }
