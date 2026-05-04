@@ -214,7 +214,4 @@ void handleSearch(vector<product> &products,ofstream &output) {
         << "\nQuantity: " << products[productIndex].quantity
         << "\nPrice: " << products[productIndex].price;
     }
-    //-----------
-    vector<product> lowStock = findLowStock(products);
-    printSummary(products,lowStock,output);
 }
