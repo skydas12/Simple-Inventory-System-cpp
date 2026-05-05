@@ -21,20 +21,54 @@ int findProductByName(const vector<product> &products);
 void sortByPrice(vector<product> &products,bool ascending);
 void sortByQuantity(vector<product> &products,bool ascending);
 void handleSorting(vector<product> &products,ofstream &output);
-void handleSearch(vector<product> &products,ofstream &output);
+void handleSearch(const vector<product> &products);
 
 int main() {
     ofstream output("output.txt");
     vector<product> products;
+    bool running = true;
     if (readProducts(products)) {
-        printProducts(products,output);
-        //-----------
-        handleSorting(products,output);
-        //-----------
-        handleSearch(products,output);
-        //-----------
-        vector<product> lowStock = findLowStock(products);
-        printSummary(products,lowStock,output);
+        while (running) {
+            cout << "< Menu >" << endl;
+            cout << "-------------------"<< endl;
+            cout << "1. Print Products" << endl;
+            cout << "2. Sort Products" << endl;
+            cout << "3. Search Products" << endl;
+            cout << "4. Print Summary" << endl;
+            cout << "5. Quit" << endl;
+            cout << "\nSelect an option 1-5: ";
+            int choice;
+
+            if (!(cin >> choice)) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cout << "Invalid input.Enter an integer number." << endl;
+                continue;
+            }
+            switch (choice) {
+                case 1:
+                    printProducts(products, output);
+                    cout << "Products written to output.txt" << endl;
+                    break;
+                case 2:
+                    handleSorting(products, output);
+                    break;
+                case 3:
+                    handleSearch(products);
+                    break;
+                case 4: {
+                    vector<product> lowStock = findLowStock(products);
+                    printSummary(products, lowStock, output);
+                    break;
+                }
+                case 5:
+                    running = false;
+                    break;
+                default:
+                    cout << "Invalid choice." << endl;
+                    break;
+            }
+        }
     }
     else {
         cout << "Error reading input." << endl;
@@ -160,21 +194,12 @@ void sortByQuantity(vector<product> &products,bool ascending) {
     }
 }
 void handleSorting(vector<product> &products, ofstream &output) {
-    cout << "Do you want to sort the data? (y/n)" << endl;
-    char sortDecision;
-    cin >> sortDecision;
-    sortDecision = tolower(sortDecision);
-
-    bool didSort = false;
-
-    if (sortDecision == 'y') {
         cout << "By what do you wish to sort:\n"
                 "- Price (p)\n"
                 "- Quantity (q)" << endl;
         char sortChoice;
         cin >> sortChoice;
         sortChoice = tolower(sortChoice);
-
         cout << "Ascending/Descending? (a/d)"<< endl;
         char orderChoice;
         cin >> orderChoice;
@@ -188,30 +213,26 @@ void handleSorting(vector<product> &products, ofstream &output) {
         //------------------
         if (sortChoice == 'p') {
             sortByPrice(products,ascending);
-            didSort = true;
+            cout << "Sorted by price." << endl;
         }
         else if (sortChoice == 'q') {
             sortByQuantity(products,ascending);
-            didSort = true;
+            cout << "Sorted by quantity." << endl;
         }
         else {
             cout << "Invalid sort choice." << endl;
         }
-    }
-    if (didSort) {
-        output << "\n<-------------------< sorted >------------------->\n";
-        printProducts(products,output);
-    }
 }
-void handleSearch(vector<product> &products,ofstream &output) {
+void handleSearch(const vector<product> &products) {
     int productIndex = findProductByName(products);
     if (productIndex == -1) {
         cout << "Product not found." << endl;
     }
     else {
+        cout << "\nSearch results:" << endl;
         cout << "Product was found." << endl;
         cout << "Name: " << products[productIndex].name
         << "\nQuantity: " << products[productIndex].quantity
-        << "\nPrice: " << products[productIndex].price;
+        << "\nPrice: " << products[productIndex].price << endl;
     }
 }
