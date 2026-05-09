@@ -5,38 +5,77 @@
 #include <cctype>
 using namespace std;
 
-struct product {
+class Product {
+    private:
     string name;
     int quantity;
     double price;
+
+    public:
+    Product (string n, int q, double pr) {
+        name = n;
+
+        if (q < 0) {
+            quantity = 0;
+        }
+        else {
+            quantity = q;
+        }
+        if (pr < 0.0) {
+            price = 0.0;
+        }
+        else {
+            price = pr;
+        }
+    }
+    //------
+        void print(ofstream &output) const {
+            output << left << setw(22) << name
+            << setw(13) << quantity
+            << setw(15) << price << endl;
+        }
+    double value() const {
+        return price * quantity;
+    }
+    double getPrice() const {
+        return price;
+    }
+    int getQuantity() const {
+        return quantity;
+    }
+    bool isLowStock() const {
+        return quantity < 5;
+    }
+    string getName() const {
+        return name;
+    }
 };
 
-bool readProducts(vector<product> &products);
-void printProducts(const vector<product> &products, ofstream &output);
-double totalInventoryValue(const vector<product> &products);
-void printSummary(const vector<product> &products, const vector<product> &lowStock, ofstream &output);
-int mostExpensiveProduct(const vector<product> &products);
-vector <product> findLowStock(const vector<product> &products);
-int findProductByName(const vector<product> &products);
-void sortByPrice(vector<product> &products,bool ascending);
-void sortByQuantity(vector<product> &products,bool ascending);
-void handleSorting(vector<product> &products,ofstream &output);
-void handleSearch(const vector<product> &products);
+bool readProducts(vector<Product> &products);
+void printProducts(const vector<Product> &products,ofstream &output);
+double totalInventoryValue(const vector<Product> &products);
+void printSummary(const vector<Product> &products, const vector<Product> &lowStock, ofstream &output);
+int mostExpensiveProduct(const vector<Product> &products);
+vector <Product> findLowStock(const vector<Product> &products);
+int findProductByName(const vector<Product> &products);
+void sortByPrice(vector<Product> &products,bool ascending);
+void sortByQuantity(vector<Product> &products,bool ascending);
+void handleSorting(vector<Product> &products);
+void handleSearch(const vector<Product> &products);
+void printFullReport(const vector<Product> &products);
 
 int main() {
-    ofstream output("output.txt");
-    vector<product> products;
+    vector<Product> products;
     bool running = true;
     if (readProducts(products)) {
         while (running) {
             cout << "< Menu >" << endl;
             cout << "-------------------"<< endl;
-            cout << "1. Print Products" << endl;
+            cout << "1. Print full product report" << endl;
             cout << "2. Sort Products" << endl;
             cout << "3. Search Products" << endl;
-            cout << "4. Print Summary" << endl;
-            cout << "5. Quit" << endl;
-            cout << "\nSelect an option 1-5: ";
+            cout << "4. Quit" << endl;
+            cout << "\nSelect an option 1-4: ";
             int choice;
 
             if (!(cin >> choice)) {
@@ -47,21 +86,16 @@ int main() {
             }
             switch (choice) {
                 case 1:
-                    printProducts(products, output);
-                    cout << "Products written to output.txt" << endl;
+                    printFullReport(products);
+                    cout << "Product report written to output.txt" << endl;
                     break;
                 case 2:
-                    handleSorting(products, output);
+                    handleSorting(products);
                     break;
                 case 3:
                     handleSearch(products);
                     break;
-                case 4: {
-                    vector<product> lowStock = findLowStock(products);
-                    printSummary(products, lowStock, output);
-                    break;
-                }
-                case 5:
+                case 4:
                     running = false;
                     break;
                 default:
@@ -73,44 +107,45 @@ int main() {
     else {
         cout << "Error reading input." << endl;
     }
-    output.close();
     return 0;
 }
 
-bool readProducts(vector<product> &products) {
+bool readProducts(vector<Product> &products) {
     ifstream input;
     input.open("input.txt");
 
     if (input.fail()) {
         return false;
     }
-        product temp;
-        while (input >> temp.name >> temp.quantity >> temp.price) {
+        string name;
+        int quantity;
+        double price;
+
+        while (input >> name >> quantity >> price) {
+            Product temp(name,quantity,price);
             products.push_back(temp);
         }
     input.close();
     return true;
 }
-void printProducts(const vector<product> &products, ofstream &output) {
+void printProducts(const vector<Product> &products,ofstream &output) {
     output << fixed << setprecision(2);
     output << left << setw(15) << "Product name" << setw(4) << "|"
     << setw(11) << "Quantity"
     << setw(5) << "|" << "Price" << endl;
     output << "<------------------------------------------------->" << endl;
     for (size_t i = 0; i < products.size(); i++) {
-        output << left << setw(22) << products[i].name
-        << setw(13) << products[i].quantity
-        << setw(15) << products[i].price << endl;
+        products[i].print(output);
     }
 }
-double totalInventoryValue(const vector<product> &products) {
+double totalInventoryValue(const vector<Product> &products) {
     double totalSum = 0.0;
-    for (const auto& p: products) {
-        totalSum += p.quantity * p.price;
+    for (const auto& product: products) {
+        totalSum += product.value();
     }
     return totalSum;
 }
-void printSummary(const vector<product> &products, const vector<product> &lowStock, ofstream &output) {
+void printSummary(const vector<Product> &products, const vector<Product> &lowStock, ofstream &output) {
     int ExpensiveProduct = mostExpensiveProduct(products);
     if (ExpensiveProduct == -1) {
         output << "No products available." << endl;
@@ -120,80 +155,79 @@ void printSummary(const vector<product> &products, const vector<product> &lowSto
         output << "<-------------< Product Summary >----------------->" << endl;
         output << endl;
         output << "Total price of the product inventory: " << totalInventoryValue(products) << endl;
-        output << "Most Expensive Product: " << products[ExpensiveProduct].name
-        << ", its price is "<< products[ExpensiveProduct].price << endl;
+        output << "Most Expensive Product: " << products[ExpensiveProduct].getName()
+        << ", its price is "<< products[ExpensiveProduct].getPrice() << endl;
         output << endl;
 
         output << "<-------< Products that are low on stock >-------->" << endl;
         output << left << setw(15) << "Product name" << setw(4) << "|"
         << setw(11) << "Quantity" << setw(6) << "|" << endl;
         for (const auto& l: lowStock) {
-            output << left << setw(22) << l.name
-            << setw(15) << l.quantity << endl;
+            output << left << setw(22) << l.getName()
+            << setw(15) << l.getQuantity() << endl;
         }
     }
 }
-int mostExpensiveProduct(const vector<product> &products) {
+int mostExpensiveProduct(const vector<Product> &products) {
     if (products.empty()) {
         return -1;
     }
-    double mostPrice = products[0].price;
+    double mostPrice = products[0].getPrice();
     int index = 0;
     for (size_t i = 1; i < products.size(); i++) {
-        if (products[i].price > mostPrice) {
-            mostPrice = products[i].price;
+        if (products[i].getPrice() > mostPrice) {
+            mostPrice = products[i].getPrice();
             index = i;
         }
     }
     return index;
 }
-vector <product> findLowStock(const vector<product> &products) {
-    vector <product> lowStock;
-    int threshold = 5;
-    for (int i = 0; i < products.size(); i++) {
-        if (products[i].quantity < threshold) {
+vector <Product> findLowStock(const vector<Product> &products) {
+    vector<Product> lowStock;
+    for (size_t i = 0; i < products.size(); i++) {
+        if (products[i].isLowStock()) {
             lowStock.push_back(products[i]);
         }
     }
     return lowStock;
 }
-int findProductByName(const vector<product> &products) {
-    string name;
+int findProductByName(const vector<Product> &products) {
+    string searchName;
     cout << "Enter Product Name: " << endl;
-    cin >> name;
+    cin >> searchName;
     for (size_t i = 0; i < products.size(); i++) {
-        if (products[i].name == name) {
+        if (products[i].getName() == searchName) {
             return i;
         }
     }
     return -1;
 }
-void sortByPrice(vector<product> &products, bool ascending) {
+void sortByPrice(vector<Product> &products, bool ascending) {
     for (size_t i = 0; i < products.size(); i++) {
         for (size_t j = i + 1; j < products.size(); j++) {
-            if (ascending && products[j].price < products[i].price ||
-                (!ascending && products[j].price > products[i].price)) {
+            if ((ascending && products[j].getPrice() < products[i].getPrice()) ||
+                (!ascending && products[j].getPrice() > products[i].getPrice())) {
 
-                product temp = products[i];
+                Product temp = products[i];
                 products[i] = products[j];
                 products[j] = temp;
             }
         }
     }
 }
-void sortByQuantity(vector<product> &products,bool ascending) {
+void sortByQuantity(vector<Product> &products,bool ascending) {
     for (size_t i = 0; i < products.size(); i++) {
         for (size_t j = i + 1; j < products.size(); j++) {
-            if (ascending && products[j].quantity < products[i].quantity ||
-                (!ascending && products[j].quantity > products[i].quantity)) {
-                product temp = products[i];
+            if ((ascending && products[j].getQuantity() < products[i].getQuantity())||
+                (!ascending && products[j].getQuantity() > products[i].getQuantity())) {
+                Product temp = products[i];
                 products[i] = products[j];
                 products[j] = temp;
             }
         }
     }
 }
-void handleSorting(vector<product> &products, ofstream &output) {
+void handleSorting(vector<Product> &products) {
         cout << "By what do you wish to sort:\n"
                 "- Price (p)\n"
                 "- Quantity (q)" << endl;
@@ -223,7 +257,7 @@ void handleSorting(vector<product> &products, ofstream &output) {
             cout << "Invalid sort choice." << endl;
         }
 }
-void handleSearch(const vector<product> &products) {
+void handleSearch(const vector<Product> &products) {
     int productIndex = findProductByName(products);
     if (productIndex == -1) {
         cout << "Product not found." << endl;
@@ -231,8 +265,18 @@ void handleSearch(const vector<product> &products) {
     else {
         cout << "\nSearch results:" << endl;
         cout << "Product was found." << endl;
-        cout << "Name: " << products[productIndex].name
-        << "\nQuantity: " << products[productIndex].quantity
-        << "\nPrice: " << products[productIndex].price << endl;
+        cout << "Name: " << products[productIndex].getName()
+        << "\nQuantity: " << products[productIndex].getQuantity()
+        << "\nPrice: " << products[productIndex].getPrice() << endl;
     }
+}
+void printFullReport(const vector<Product> &products) {
+    ofstream output("output.txt");
+
+    printProducts(products,output);
+
+    vector<Product> lowStock = findLowStock(products);
+    printSummary(products, lowStock, output);
+
+    output.close();
 }
